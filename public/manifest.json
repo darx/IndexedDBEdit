@@ -1,0 +1,20 @@
+{
+  "name": "IndexedDB Edit",
+  "version": "0.0.1",
+  "manifest_version": 2,
+  "description": "Devtools panel for changing IndexedDB key values",
+  "devtools_page": "devtools.html",
+  "options_ui": {
+    "page": "options.html"
+  },
+  "background": {
+    "scripts": [
+      "background.js"
+    ]
+  },
+  "permissions": [
+    "storage",
+    "http://*/*",
+    "https://*/*"
+  ]
+}
