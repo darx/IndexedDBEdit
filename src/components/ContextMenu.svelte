@@ -55,9 +55,6 @@
             on:click={item.action}
             on:click={() => (active = false)}
           >
-            {#if item.icon}
-              <svelte:component this={item.icon.name} {...item.icon.props} />
-            {/if}
             {item.value}
           </button>
         </li>
