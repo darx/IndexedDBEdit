@@ -24,7 +24,7 @@
   const getBoxPosition = () => {
     let { offsetWidth: boxWidth } = actionBox;
     return {
-      top: mouse.y + 10 + "px",
+      top: mouse.y + "px",
       left: (mouse.x > boxWidth ? mouse.x - boxWidth : mouse.x) + "px",
     };
   };
@@ -34,6 +34,7 @@
 
 <svelte:window
   on:keyup={onKeyup}
+  on:mouseup={onMousemove}
   on:mousemove={onMousemove}
   on:contextmenu={onContextMenu}
 />
@@ -67,8 +68,8 @@
 
 <style>
   .action_box {
-    margin: 0;
     z-index: 90;
+    margin: 10px;
     padding: 6px;
     color: #000;
     position: fixed;
