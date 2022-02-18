@@ -1,7 +1,3 @@
-import resizable from "./resizable";
-
-console.log((resizable.toString()));
-
 export default class storageController {
   constructor() {
     if (!chrome.devtools) {

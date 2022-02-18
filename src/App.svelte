@@ -9,9 +9,9 @@
   import TreeView from "./components/TreeView.svelte";
   import Progress from "./components/Progress.svelte";
   import JSONEditor from "./components/JSONEditor.svelte";
-  import ReloadButton from "./components/button/Reload.svelte";
+  import ContextMenu from "./components/ContextMenu.svelte";
   import BracketsIcon from "./components/icons/Brackets.svelte";
-
+  
   const StorageController = new storageController();
 
   let json;
@@ -131,7 +131,16 @@
 </script>
 
 <main>
-  <ReloadButton />
+  <ContextMenu
+    items={[
+      {
+        value: "Reload",
+        action() {
+          location.reload(true);
+        },
+      },
+    ]}
+  />
 
   {#if content}
     <div class="panel" use:resizable={"right"} in:fly={{ x: -200 }}>

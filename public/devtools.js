@@ -1,1 +1,1 @@
-chrome.devtools.panels.create("IndexedDB Edit", "", "panel.html");
+chrome.devtools.panels.create("IndexedDBEdit", "", "panel.html");
