@@ -51,13 +51,13 @@
         <li class="action_list_item">
           <button
             type="button"
-            on:click={itemouse.action}
+            on:click={item.action}
             on:click={() => (active = false)}
           >
-            {#if itemouse.icon}
-              <svelte:component this={itemouse.icon.name} {...itemouse.icon.props} />
+            {#if item.icon}
+              <svelte:component this={item.icon.name} {...item.icon.props} />
             {/if}
-            {itemouse.value}
+            {item.value}
           </button>
         </li>
       {/each}
