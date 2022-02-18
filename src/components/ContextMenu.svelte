@@ -5,31 +5,31 @@
   import style from "../utils/style";
   import clickOutside from "../utils/clickOutside";
 
-  const onContextMenu = () => (active = true);
+  let actionBox;
+  let styles = {};
+  let mouse = { x: 0, y: 0 };
+
   const onKeyup = (e) => {
     if (active && e.keyCode === 27) active = false;
   };
 
-  let m = { x: 0, y: 0 };
+  const onContextMenu = () => (active = true);
 
   const onMousemove = (e) => {
+    const { clientX, clientY } = e;
     if (active === true) return;
-    m.x = e.clientX;
-    m.y = e.clientY;
+    mouse = { x: clientX, y: clientY };
   };
 
-  let styles = {};
-  let actionBox;
+  const getBoxPosition = () => {
+    let { offsetWidth: boxWidth } = actionBox;
+    return {
+      top: mouse.y + 10 + "px",
+      left: (mouse.x > boxWidth ? mouse.x - boxWidth : mouse.x) + "px",
+    };
+  };
 
-  $: styles = actionBox
-      ? (() => {
-          let { offsetWidth: boxWidth } = actionBox;
-          return {
-            top: m.y + 10 + "px",
-            left: (m.x > boxWidth ? m.x - boxWidth : m.x) + "px",
-          };
-        })()
-      : {};
+  $: styles = actionBox ? getBoxPosition() : {};
 </script>
 
 <svelte:window
@@ -51,13 +51,13 @@
         <li class="action_list_item">
           <button
             type="button"
-            on:click={item.action}
+            on:click={itemouse.action}
             on:click={() => (active = false)}
           >
-            {#if item.icon}
-              <svelte:component this={item.icon.name} {...item.icon.props} />
+            {#if itemouse.icon}
+              <svelte:component this={itemouse.icon.name} {...itemouse.icon.props} />
             {/if}
-            {item.value}
+            {itemouse.value}
           </button>
         </li>
       {/each}
@@ -75,6 +75,7 @@
     font-size: 14px;
     min-width: 172px;
     line-height: 1.4;
+    user-select: none;
     border-radius: 8px;
     box-sizing: border-box;
     background-color: #fff;
