@@ -123,7 +123,7 @@
           version: options.source.transaction.db.version,
           database: options.database,
           storeName: options.source.name,
-          storeNameKey: x.key,
+          storeNameKey: typeof x.key === "number" ? x.key : `"${x.key}"`,
           storeNameKeyValue: JSON.stringify(x.value)
         });
       }
