@@ -1,5 +1,6 @@
 <script>
   import { fade, fly } from "svelte/transition";
+  import differenceBy from "lodash/differenceBy";
 
   import { databases, selected, tree } from "./store";
 
@@ -11,10 +12,10 @@
   import JSONEditor from "./components/JSONEditor.svelte";
   import ContextMenu from "./components/ContextMenu.svelte";
   import BracketsIcon from "./components/icons/Brackets.svelte";
-  
+
   const StorageController = new storageController();
 
-  let json;
+  let options;
   let loading = 0;
 
   let waiting = setInterval(() => {
@@ -27,24 +28,6 @@
 
   function init() {
     databases.set([]);
-
-    // StorageController.fetchNames((data) => {
-    // 	// console.log(data);
-    // 	data.forEach((params) => {
-    // 		// console.log(params);
-    // 		StorageController.fetchTable(params, (data) => {
-    // 			// console.log(data);
-    // 			databases.set(
-    // 				$databases.concat([
-    // 					{
-    // 						name: params.name,
-    // 						files: data,
-    // 					},
-    // 				])
-    // 			);
-    // 		});
-    // 	});
-    // });
 
     StorageController.test((d) => {
       loading = 100;
@@ -92,32 +75,34 @@
   init();
 
   const onBlur = () => {
-    // console.log(JSON.parse(selected));
-    // StorageController.updateValue({
-    // 	database: "localforage",
-    // 	version: 2,
-    // 	storeName: "keyvaluepairs",
-    // 	storeNameKey: "token",
-    // 	storeNameKeyValue: Math.random(),
-    // });
-    // init();
   };
 
   const storeLookup = (database, store) => {
-    let items = $databases
+    const items = $databases
       .find((x) => x.databaseName == database)
       .stores.find((x) => x.name == store).data;
 
-    return items.map((x) => {
+    const selected = { database };
+
+    const values = items.map((x) => {
+      if (!selected.source) selected.source = x.source;
       return { key: x.key, value: x.value };
     });
+
+    return [values, selected];
   };
 
-  $: json = !$selected ? null : $selected;
   $: content = $databases.length > 0;
 
-  const onTreeClick = ({ detail }) =>
-    selected.set(storeLookup.apply(null, detail));
+  let compare;
+
+  const onTreeClick = ({ detail }) => {
+    const items = storeLookup.apply(null, detail);
+
+    options = items[1];
+    selected.set(items[0]);
+    compare = items[0];
+  };
 
   $: placeholder = (() => {
     if (loading < 100) {
@@ -128,6 +113,22 @@
       return "Select object store";
     }
   })();
+
+  $: {
+    let diff = differenceBy($selected, compare, "value");
+    diff.forEach(x => {
+      if (x && x.key) {
+        console.log(diff);
+        StorageController.updateValue({
+          version: options.source.transaction.db.version,
+          database: options.database,
+          storeName: options.source.name,
+          storeNameKey: x.key,
+          storeNameKeyValue: JSON.stringify(x.value)
+        });
+      }
+    });
+  }
 </script>
 
 <main>
@@ -153,7 +154,7 @@
   <div class="content">
     <Progress value={loading} hideOnComplete={true} />
 
-    {#if !json || !json.length}
+    {#if !$selected || !$selected.length}
       <div class="no_table">
         <BracketsIcon />
         <div>
@@ -165,7 +166,7 @@
         </div>
       </div>
     {:else}
-      <JSONEditor on:blur={onBlur} bind:value={json} />
+      <JSONEditor on:blur={onBlur} bind:value={$selected} />
     {/if}
   </div>
 </main>

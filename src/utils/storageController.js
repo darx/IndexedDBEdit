@@ -134,10 +134,10 @@ export default class storageController {
           var transaction = db.transaction(["${opts.storeName}"], 'readwrite');
           var objectStore = transaction.objectStore("${opts.storeName}");
 
-          request = objectStore.get("${opts.storeNameKey}");
+          request = objectStore.get(${opts.storeNameKey});
 
           request.onsuccess = (event) => {
-            objectStore.put("${opts.storeNameKeyValue}", "${opts.storeNameKey}")
+            objectStore.put(${opts.storeNameKeyValue}, ${opts.storeNameKey})
           };
         };
       })();`;

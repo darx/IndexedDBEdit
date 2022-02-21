@@ -77,7 +77,7 @@
     border-radius: 8px;
     box-sizing: border-box;
     background-color: #fff;
-    box-shadow: 3px 0px 8px 0px rgb(0 0 0 / 25%);
+    box-shadow: 3px 0px 8px 0px rgba(0, 0, 0, 0.25);
   }
 
   .action_box .action_wrap {
