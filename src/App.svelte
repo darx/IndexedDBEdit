@@ -5,6 +5,7 @@
   import { databases, selected, tree } from "./store";
 
   import resizable from "./utils/resizable";
+  import keyBindings from "./utils/keyBindings";
   import storageController from "./utils/storageController";
 
   import TreeView from "./components/TreeView.svelte";
@@ -12,6 +13,7 @@
   import JSONEditor from "./components/JSONEditor.svelte";
   import ContextMenu from "./components/ContextMenu.svelte";
   import BracketsIcon from "./components/icons/Brackets.svelte";
+  import ActionsIcons from "./components/icons/Actions.svelte";
 
   const StorageController = new storageController();
 
@@ -146,6 +148,18 @@
   {#if content}
     <div class="panel" use:resizable={"right"} in:fly={{ x: -200 }}>
       <div class="wrapper">
+        <div class="toolbar">
+          <button
+            use:keyBindings={["ctrlKey", "shiftKey", 69]}
+            class="toolbar-item toolbar-buttom"
+            type="button"
+            on:click={() => location.reload(true)}
+            aria-label="Reload page"
+            title="Reload page - Ctrl&hairsp;+&hairsp;Shift&hairsp;+&hairsp;E"
+          >
+            <ActionsIcons size="16" name="refresh" />
+          </button>
+        </div>
         <TreeView bind:tree={$tree} on:select={onTreeClick} />
       </div>
     </div>
@@ -313,5 +327,57 @@
     right: -10px;
     cursor: se-resize;
     border-radius: 100%;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    main .panel {
+      color: #fff;
+      background-color: #292a2d;
+      border-right: 1px solid #494c50;
+    }
+    main .content {
+      color: #fff;
+      background-color: #202124;
+    }
+    :global(.grabber:hover) {
+      border-color: #494c50;
+    }
+  }
+
+  button {
+    margin: 0;
+    border: 0;
+    padding: 0;
+    color: inherit;
+    cursor: pointer;
+    background-color: transparent;
+  }
+
+  .toolbar {
+    display: flex;
+    justify-content: end;
+    border-bottom: 1px solid #494c50;
+  }
+
+  .toolbar-buttom {
+    white-space: nowrap;
+    overflow: hidden;
+    min-width: 28px;
+    background: 0 0;
+    border-radius: 0;
+    cursor: pointer;
+  }
+
+  .toolbar-item {
+    position: relative;
+    display: flex;
+    background-color: transparent;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    height: 26px;
+    border: none;
+    white-space: pre;
   }
 </style>
