@@ -150,6 +150,17 @@
       <div class="wrapper">
         <div class="toolbar">
           <button
+            use:keyBindings={["altKey", "shiftKey", 70]}
+            class="toolbar-item toolbar-buttom"
+            type="button"
+            on:click={() => location.reload(true)}
+            aria-label="Filter object stores"
+            title="Filter object stores - Alt&hairsp;+&hairsp;Shift&hairsp;+&hairsp;F"
+          >
+            <ActionsIcons size="16" name="filter" />
+          </button>
+
+          <button
             use:keyBindings={["ctrlKey", "shiftKey", 69]}
             class="toolbar-item toolbar-buttom"
             type="button"
