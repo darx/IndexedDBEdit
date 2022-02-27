@@ -1,6 +1,6 @@
 import { writable } from "svelte/store";
 
-export let selected = writable([]);
+export let selected = writable(null);
 export let databases = writable([]);
 
 export let tree = writable({

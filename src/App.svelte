@@ -76,27 +76,39 @@
   init();
 
   const onBlur = ({ detail }) => {
-    let { [0]: updated, [1]: diff, [2]: original } = detail;
+    let { [0]: updated, [2]: original } = detail;
 
-    console.log(diff);
+    const isSameRecord = (x, y) => x.key == y.key && x.vaule == y.vaule;
 
-    let changes = [...diff]
-        .map(x => { if (x.path) return x.path[0] })
-        .filter((x, i, o) => o.indexOf(x) === i);
+    const inLeft = (l, r, compare) =>
+      l.filter((lv) => !r.some((rv) => compare(lv, rv)));
 
-    console.log(changes);
+    const inX = inLeft(updated, original, isSameRecord);
+    const inY = inLeft(original, updated, isSameRecord);
 
-    diff.forEach(x => {
-      if (x?.item?.kind == "D") {
-        let { key } = x.item.lhs;
-        StorageController.deleteRecord({
+    const deleted = [...inX, ...inY].map((x) => x.key);
+
+    deleted.forEach((x) =>
+      StorageController.deleteRecord({
+        version: options.source.transaction.db.version,
+        database: options.database,
+        storeName: options.source.name,
+        storeNameKey: typeof x === "number" ? x : `"${x}"`,
+      })
+    );
+
+    let diff = differenceBy(updated, original, "value");
+    diff.forEach((x) => {
+      if (x && x.key) {
+        StorageController.updateValue({
           version: options.source.transaction.db.version,
           database: options.database,
           storeName: options.source.name,
-          storeNameKey: typeof key === "number" ? key : `"${key}"`
+          storeNameKey: typeof x.key === "number" ? x.key : `"${x.key}"`,
+          storeNameKeyValue: JSON.stringify(x.value),
         });
       }
-    })
+    });
   };
 
   const storeLookup = (database, store) => {
@@ -116,14 +128,11 @@
 
   $: content = $databases.length > 0;
 
-  let compare;
-
   const onTreeClick = ({ detail }) => {
     const items = storeLookup.apply(null, detail);
 
     options = items[1];
     selected.set(items[0]);
-    compare = items[0];
   };
 
   $: placeholder = (() => {
@@ -135,22 +144,6 @@
       return "Select object store";
     }
   })();
-
-  $: {
-    let diff = differenceBy($selected, compare, "value");
-    diff.forEach((x) => {
-      if (x && x.key) {
-        console.log(diff);
-        StorageController.updateValue({
-          version: options.source.transaction.db.version,
-          database: options.database,
-          storeName: options.source.name,
-          storeNameKey: typeof x.key === "number" ? x.key : `"${x.key}"`,
-          storeNameKeyValue: JSON.stringify(x.value),
-        });
-      }
-    });
-  }
 </script>
 
 <main>
@@ -177,7 +170,7 @@
   <div class="content">
     <Progress value={loading} hideOnComplete={true} />
 
-    {#if !$selected || !$selected.length}
+    {#if !$selected}
       <div class="no_table">
         <BracketsIcon />
         <div>
