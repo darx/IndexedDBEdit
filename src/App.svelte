@@ -5,15 +5,14 @@
   import { databases, selected, tree } from "./store";
 
   import resizable from "./utils/resizable";
-  import keyBindings from "./utils/keyBindings";
   import storageController from "./utils/storageController";
 
+  import Toolbar from "./components/Toolbar.svelte";
   import TreeView from "./components/TreeView.svelte";
   import Progress from "./components/Progress.svelte";
   import JSONEditor from "./components/JSONEditor.svelte";
   import ContextMenu from "./components/ContextMenu.svelte";
   import BracketsIcon from "./components/icons/Brackets.svelte";
-  import ActionsIcons from "./components/icons/Actions.svelte";
 
   const StorageController = new storageController();
 
@@ -76,7 +75,28 @@
 
   init();
 
-  const onBlur = () => {
+  const onBlur = ({ detail }) => {
+    let { [0]: updated, [1]: diff, [2]: original } = detail;
+
+    console.log(diff);
+
+    let changes = [...diff]
+        .map(x => { if (x.path) return x.path[0] })
+        .filter((x, i, o) => o.indexOf(x) === i);
+
+    console.log(changes);
+
+    diff.forEach(x => {
+      if (x?.item?.kind == "D") {
+        let { key } = x.item.lhs;
+        StorageController.deleteRecord({
+          version: options.source.transaction.db.version,
+          database: options.database,
+          storeName: options.source.name,
+          storeNameKey: typeof key === "number" ? key : `"${key}"`
+        });
+      }
+    })
   };
 
   const storeLookup = (database, store) => {
@@ -118,7 +138,7 @@
 
   $: {
     let diff = differenceBy($selected, compare, "value");
-    diff.forEach(x => {
+    diff.forEach((x) => {
       if (x && x.key) {
         console.log(diff);
         StorageController.updateValue({
@@ -126,7 +146,7 @@
           database: options.database,
           storeName: options.source.name,
           storeNameKey: typeof x.key === "number" ? x.key : `"${x.key}"`,
-          storeNameKeyValue: JSON.stringify(x.value)
+          storeNameKeyValue: JSON.stringify(x.value),
         });
       }
     });
@@ -148,29 +168,7 @@
   {#if content}
     <div class="panel" use:resizable={"right"} in:fly={{ x: -200 }}>
       <div class="wrapper">
-        <div class="toolbar">
-          <button
-            use:keyBindings={["altKey", "shiftKey", 70]}
-            class="toolbar-item toolbar-buttom"
-            type="button"
-            on:click={() => location.reload(true)}
-            aria-label="Filter object stores"
-            title="Filter object stores - Alt&hairsp;+&hairsp;Shift&hairsp;+&hairsp;F"
-          >
-            <ActionsIcons size="16" name="filter" />
-          </button>
-
-          <button
-            use:keyBindings={["ctrlKey", "shiftKey", 69]}
-            class="toolbar-item toolbar-buttom"
-            type="button"
-            on:click={() => location.reload(true)}
-            aria-label="Reload page"
-            title="Reload page - Ctrl&hairsp;+&hairsp;Shift&hairsp;+&hairsp;E"
-          >
-            <ActionsIcons size="16" name="refresh" />
-          </button>
-        </div>
+        <Toolbar />
         <TreeView bind:tree={$tree} on:select={onTreeClick} />
       </div>
     </div>
@@ -204,6 +202,14 @@
     box-sizing: border-box;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
       Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  }
+
+  :global(button) {
+    border: 0;
+    color: inherit;
+    cursor: pointer;
+    display: inline-flex;
+    background-color: transparent;
   }
 
   main {
@@ -341,6 +347,9 @@
   }
 
   @media (prefers-color-scheme: dark) {
+    :global(body) {
+      background-color: #202124;
+    }
     main .panel {
       color: #fff;
       background-color: #292a2d;
@@ -353,42 +362,5 @@
     :global(.grabber:hover) {
       border-color: #494c50;
     }
-  }
-
-  button {
-    margin: 0;
-    border: 0;
-    padding: 0;
-    color: inherit;
-    cursor: pointer;
-    background-color: transparent;
-  }
-
-  .toolbar {
-    display: flex;
-    justify-content: end;
-    border-bottom: 1px solid #494c50;
-  }
-
-  .toolbar-buttom {
-    white-space: nowrap;
-    overflow: hidden;
-    min-width: 28px;
-    background: 0 0;
-    border-radius: 0;
-    cursor: pointer;
-  }
-
-  .toolbar-item {
-    position: relative;
-    display: flex;
-    background-color: transparent;
-    flex: none;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    height: 26px;
-    border: none;
-    white-space: pre;
   }
 </style>

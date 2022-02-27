@@ -1,37 +1,55 @@
 <script>
-  export let json;
+  export let json = [];
   export let value = [];
 
   import { onDestroy, onMount, createEventDispatcher } from "svelte";
+
+  import diff from "deep-diff";
   import ace from "ace-builds";
 
-  const dispatch = createEventDispatcher();
+  import "brace/mode/json";
+  import "brace/worker/json";
+  import "brace/theme/twilight";
+
+  import isJSON from "../utils/isJSON";
 
   let editor;
   let container;
-  
 
-  const onBlur = () => dispatch("input", (value = json = editor.getValue()));
-  const onChange = (data) => dispatch("input", data);
+  const dispatch = createEventDispatcher();
 
-  import "brace/theme/twilight";
+  const onBlur = () => {
+    let content = editor.getValue();
 
-  onMount(
-    () => {
-      
-      // jsoneditor = new JSONEditor(container, {
-      //   mode: "code",
-      //   onBlur: onBlur,
-      //   onChangeJSON: onChange
-      // });
+    if (!isJSON(content)) return;
 
-      editor = ace.edit(container, {
-        mode: "ace/mode/json"
-      });
-      editor.setTheme("ace/theme/twilight");
+    let parsed = JSON.parse(content);
+    
+    let difference = diff(value, parsed);
+    if (!difference) return;
 
-      editor.session.on('change', onChange);
+    dispatch("blur", [ parsed, difference, value ]);
+
+    value = json = parsed;
+  };
+
+  const onChange = () => {};
+
+  onMount(() => {
+    editor = ace.edit(container, {
+      mode: "ace/mode/json",
     });
+
+    if (
+      window.matchMedia &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches
+    ) {
+      editor.setTheme("ace/theme/twilight");
+    }
+
+    editor.on("blur", onBlur);
+    editor.session.on("change", onChange);
+  });
 
   onDestroy(() => {
     if (editor) editor.destroy();

@@ -124,6 +124,24 @@ export default class storageController {
 
   updateTableValues() {}
 
+  deleteRecord(opts, fn) {
+    let script = `(async () => {
+      let connection = indexedDB.open("${opts.database}", ${opts.version});
+
+      connection.onsuccess = (e) => {
+        let db = e.target.result;
+        let transaction = db.transaction(["${opts.storeName}"], "readwrite");
+        let objectStore = transaction.objectStore("${opts.storeName}");
+        
+        objectStore.delete(${opts.storeNameKey});
+      };
+    })();`;
+
+    chrome.devtools.inspectedWindow.eval(script, (o, r) => {
+
+    });
+  }
+
   updateValue(opts, fn) {
     let script = `
       (async () => {

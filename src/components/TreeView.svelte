@@ -4,7 +4,7 @@
 
 <script>
   export let tree;
-  export let parent;
+  export let parent = undefined;
 
   import { createEventDispatcher } from "svelte";
 
