@@ -5,7 +5,8 @@
   "scripts": {
     "build": "rollup -c",
     "dev": "rollup -c -w",
-    "start": "sirv public --no-clear"
+    "start": "sirv public --no-clear",
+    "compile": "rm -f -R node_modules && rm -f ./public/bundle.zip && npm ci && npm run build && zip -r -x './public/.env' -X bundle.zip ./public/*"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^17.0.0",

@@ -1,0 +1,39 @@
+name: Deploy Production
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy_source:
+    name: Build & Deploy
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+
+      - id: identify
+        run: |
+          PACKAGE_VERSION=$(cat package.json \
+            | grep version \
+            | head -1 \
+            | awk -F: '{ print $2 }' \
+            | sed 's/[",]//g')
+            export PACKAGE_VERSION
+            echo "::set-output name=package_version::${PACKAGE_VERSION}"
+            echo "::set-output name=short_ref::${GITHUB_REF#refs/*/}"
+        shell: sh
+
+      - name: Current Version
+        run: |
+          echo ${{ steps.identify.outputs.package_version }}
+          echo ${{ steps.identify.outputs.short_ref }}
+        shell: sh
+
+      - name: Setup node 14
+        uses: actions/setup-node@v2-beta
+        with:
+          node-version: 14.x
+
+      - name: Install dependencies, Build application and Zip
+        run: npm run compile

@@ -1,6 +1,6 @@
 {
   "name": "IndexedDBEdit",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "manifest_version": 3,
   "description": "Devtools panel for changing IndexedDB key values",
   "devtools_page": "devtools.html",
@@ -15,9 +15,6 @@
     "service_worker": "background.js"
   },
   "permissions": [
-    "storage"
-  ],
-  "host_permissions": [
-    "*://*/*"
+    "activeTab"
   ]
 }
