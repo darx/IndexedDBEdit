@@ -26,4 +26,4 @@
 
 ![IndexedDBEdit](public/assets/indexeddb-edit-screenshot-md.png 'IndexedDBEdit')
 
-Compito is a simple and easy to use devtools panel for modifying / deleting IndexedDB key value records.
+IndexedDBEdit is a simple and easy to use devtools panel for modifying / deleting IndexedDB key value records.
