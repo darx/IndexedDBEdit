@@ -8,9 +8,6 @@
   <h3 align="center">IndexedDBEdit</h3>
 
   <p align="center">
-    A simple and user friendly project management application with support for multiple Orgs and RBAC
-    <br />
-    <br />
     <a href="https://chrome.google.com/webstore/detail/indexeddbedit/npjecebdjnmlolggnoajngnlodhgpfac">Add to Chrome</a>
     ·
     <a href="https://github.com/darx/IndexedDBEdit/issues">Report Bug</a>
