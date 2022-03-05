@@ -4,20 +4,23 @@
 
   import { databases, selected, tree } from "./store";
 
+  import tips from "./stubs/tips";
+  import settings from "./stubs/settings";
+
   import resizable from "./utils/resizable";
   import storageController from "./utils/storageController";
 
+  import Notification from "./components/Notification.svelte";
   import Toolbar from "./components/Toolbar.svelte";
   import TreeView from "./components/TreeView.svelte";
   import Progress from "./components/Progress.svelte";
   import JSONEditor from "./components/JSONEditor.svelte";
-  import ContextMenu from "./components/ContextMenu.svelte";
   import BracketsIcon from "./components/icons/Brackets.svelte";
 
-  const StorageController = new storageController();
-
+  let editor;
   let options;
   let loading = 0;
+  let saving = false;
 
   let waiting = setInterval(() => {
     loading = loading + 10;
@@ -27,7 +30,9 @@
     }
   }, 1000);
 
-  function init() {
+  const StorageController = new storageController();
+
+  const init = () => {
     databases.set([]);
 
     StorageController.test((d) => {
@@ -71,11 +76,11 @@
       tree.set(test);
       databases.set(structure);
     });
-  }
+  };
 
   init();
 
-  const onBlur = ({ detail }) => {
+  const onSave = ({ detail }) => {
     let { [0]: updated, [2]: original } = detail;
 
     const isSameRecord = (x, y) => x.key == y.key && x.vaule == y.vaule;
@@ -87,6 +92,8 @@
     const inY = inLeft(original, updated, isSameRecord);
 
     const deleted = [...inX, ...inY].map((x) => x.key);
+
+    saving = true;
 
     deleted.forEach((x) =>
       StorageController.deleteRecord({
@@ -126,13 +133,16 @@
     return [values, selected];
   };
 
-  $: content = $databases.length > 0;
-
   const onTreeClick = ({ detail }) => {
     const items = storeLookup.apply(null, detail);
 
     options = items[1];
     selected.set(items[0]);
+  };
+
+  const actionSaveEditor = () => {
+    if (!editor?.save) return;
+    editor.save();
   };
 
   $: placeholder = (() => {
@@ -144,30 +154,35 @@
       return "Select object store";
     }
   })();
+
+  $: content = $databases.length > 0;
+  $: resizeDirection = preferences.side_position == "Right" ? "left" : "right";
+  $: preferences = $settings.reduce(
+    (acc, curr) => ((acc[curr.name] = curr.value), acc),
+    {}
+  );
 </script>
 
-<main>
-  <ContextMenu
-    items={[
-      {
-        value: "Reload",
-        action() {
-          location.reload(true);
-        },
-      },
-    ]}
-  />
-
+<main class:panel_right={preferences.side_position == "Right"}>
   {#if content}
-    <div class="panel" use:resizable={"right"} in:fly={{ x: -200 }}>
+    <div
+      class="panel"
+      use:resizable={resizeDirection}
+      in:fly={{ x: preferences.side_position == "Right" ? 200 : -200 }}
+    >
       <div class="wrapper">
-        <Toolbar />
+        <Toolbar on:manualSave={() => actionSaveEditor()} />
         <TreeView bind:tree={$tree} on:select={onTreeClick} />
       </div>
     </div>
   {/if}
 
   <div class="content">
+    <Notification
+      {...$tips.save_method}
+      position={preferences.message_position}
+      bind:active={$tips.save_method.active}
+    />
     <Progress value={loading} hideOnComplete={true} />
 
     {#if !$selected}
@@ -182,7 +197,12 @@
         </div>
       </div>
     {:else}
-      <JSONEditor on:blur={onBlur} bind:value={$selected} />
+      <Notification
+        bind:active={saving}
+        text="Saving changes ..."
+        timeout={2000}
+      />
+      <JSONEditor on:save={onSave} bind:editor bind:value={$selected} />
     {/if}
   </div>
 </main>
@@ -228,10 +248,19 @@
     white-space: nowrap;
     padding: 1em 1em 1em 0;
     box-sizing: border-box;
-    background-color: #ebebeb;
-    border-right: 1px solid #d3d3d3;
+    background-color: var(--light-secondery-background-colour, #ebebeb);
+    border-right: 1px solid var(--light-border-colour, #d3d3d3);
     overflow: hidden;
     flex: 1 0 auto;
+  }
+
+  main.panel_right {
+    flex-direction: row-reverse;
+  }
+
+  main.panel_right .panel {
+    border-right: 0;
+    border-left: 1px solid var(--light-border-colour, #d3d3d3);
   }
 
   .panel .wrapper {
@@ -262,98 +291,25 @@
     }
   }
 
-  :global(.grabber) {
-    position: absolute;
-    box-sizing: border-box;
-  }
-
-  :global(.grabber:hover) {
-    border-color: #d3d3d3;
-    border-style: solid;
-    border-width: 5px;
-  }
-
-  :global(.grabber.right) {
-    width: 10px;
-    height: 100%;
-    right: -5px;
-    top: 0;
-    cursor: col-resize;
-  }
-
-  :global(.grabber.left) {
-    width: 10px;
-    height: 100%;
-    left: -5px;
-    top: 0;
-    cursor: col-resize;
-  }
-
-  :global(.grabber.top) {
-    height: 10px;
-    width: 100%;
-    top: -5px;
-    cursor: row-resize;
-  }
-
-  :global(.grabber.bottom) {
-    height: 10px;
-    width: 100%;
-    bottom: -5px;
-    cursor: row-resize;
-  }
-
-  :global(.grabber.top-left) {
-    height: 20px;
-    width: 20px;
-    top: -10px;
-    left: -10px;
-    cursor: nw-resize;
-    border-radius: 100%;
-  }
-
-  :global(.grabber.top-right) {
-    height: 20px;
-    width: 20px;
-    top: -10px;
-    right: -10px;
-    cursor: ne-resize;
-    border-radius: 100%;
-  }
-
-  :global(.grabber.bottom-left) {
-    height: 20px;
-    width: 20px;
-    bottom: -10px;
-    left: -10px;
-    cursor: sw-resize;
-    border-radius: 100%;
-  }
-
-  :global(.grabber.bottom-right) {
-    height: 20px;
-    width: 20px;
-    bottom: -10px;
-    right: -10px;
-    cursor: se-resize;
-    border-radius: 100%;
-  }
-
   @media (prefers-color-scheme: dark) {
     :global(body) {
-      background-color: #202124;
+      background-color: var(--dark-primary-background-colour, #202124);
     }
     main .panel {
       color: #fff;
-      background-color: #292a2d;
-      border-right: 1px solid #494c50;
+      background-color: var(--dark-secondery-background-colour, #292a2d);
+      border-right: 1px solid var(--dark-border-colour, #494c50);
+    }
+    main.panel_right .panel {
+      border-right: 0;
+      border-left: 1px solid var(--dark-border-colour, #d3d3d3);
     }
     main .content {
       color: #fff;
-      background-color: #202124;
+      background-color: var(--dark-primary-background-colour, #202124);
     }
     :global(.grabber:hover) {
-      border-color: #494c50;
+      border-color: var(--dark-border-colour, #494c50);
     }
   }
 </style>

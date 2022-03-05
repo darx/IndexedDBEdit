@@ -1,8 +1,18 @@
 <script>
   export let json = [];
   export let value = [];
+  export let editor;
+
+  import settings from "../stubs/settings";
+
+  $: preferences = $settings.reduce(
+    (acc, curr) => ((acc[curr.name] = curr.value), acc),
+    {}
+  );
 
   import { onDestroy, onMount, createEventDispatcher } from "svelte";
+
+  import debounce from "../utils/debounce";
 
   import diff from "deep-diff";
   import ace from "ace-builds";
@@ -13,31 +23,30 @@
 
   import isJSON from "../utils/isJSON";
 
-  let editor;
   let container;
 
   const dispatch = createEventDispatcher();
 
-  const onBlur = () => {
+  export const save = () => {
     let content = editor.getValue();
 
     if (!isJSON(content)) return;
 
     let parsed = JSON.parse(content);
-    
+
     let difference = diff(value, parsed);
     if (!difference) return;
 
-    dispatch("blur", [ parsed, difference, value ]);
+    dispatch("save", [parsed, difference, value]);
 
     value = json = parsed;
   };
 
-  const onChange = () => {};
-
   onMount(() => {
     editor = ace.edit(container, {
       mode: "ace/mode/json",
+      tabSize: preferences.tab_size,
+      useSoftTabs: true,
     });
 
     if (
@@ -47,15 +56,34 @@
       editor.setTheme("ace/theme/twilight");
     }
 
-    editor.on("blur", onBlur);
-    editor.session.on("change", onChange);
+    window
+      .matchMedia("(prefers-color-scheme: dark)")
+      .addEventListener("change", (e) =>
+        editor.setTheme(e.matches ? "ace/theme/twilight" : "")
+      );
+
+    if (preferences.save_method == "Debounce") {
+      const handleInput = debounce(
+        () => save(),
+        preferences.debounce_time || 2000
+      );
+
+      editor.session.on("change", handleInput);
+    }
+
+    if (preferences.save_method == "Blur") {
+      editor.on("blur", save);
+    }
+
+    editor.save = save;
   });
 
   onDestroy(() => {
     if (editor) editor.destroy();
   });
 
-  $: if (editor) editor.setValue(JSON.stringify(value, null, 2));
+  $: if (editor)
+    editor.setValue(JSON.stringify(value, null, preferences.tab_size));
 </script>
 
 <div class="jsoneditor-svelte-container" bind:this={container} />
@@ -68,7 +96,7 @@
 
   @media (prefers-color-scheme: dark) {
     .jsoneditor-svelte-container :global(.jsoneditor-menu) {
-      background-color: #202124;
+      background-color: var(--dark-primary-background-colour, #202124);
       border-bottom: 1px solid #494c50;
     }
   }
