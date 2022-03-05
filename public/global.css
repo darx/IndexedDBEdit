@@ -1,0 +1,132 @@
+:root {
+  --dark-primary-background-colour: #202124;
+  --dark-secondery-background-colour: #292a2d;
+  --dark-border-colour: #494c50;
+
+  --light-primary-background-colour: #ffffff;
+  --light-secondery-background-colour: #ebebeb;
+  --light-border-colour: #d3d3d3;
+}
+
+kbd {
+  font-family: Consolas, "Lucida Console", monospace;
+  display: inline-block;
+  border-radius: 3px;
+  padding: 0px 4px;
+  box-shadow: 1px 1px 1px #777;
+  margin: 2px;
+  font-size: small;
+  vertical-align: text-bottom;
+  background: #eee;
+  font-weight: 500;
+  color: #555;
+  cursor: pointer;
+  font-variant: small-caps;
+  font-weight: 600;
+  letter-spacing: 1px;
+  user-select: none;
+}
+
+kbd:hover,
+kbd:hover * {
+  color: black;
+}
+kbd:active,
+kbd:active * {
+  color: black;
+  box-shadow: 1px 1px 0px #ddd inset;
+}
+
+kbd kbd {
+  padding: 0px;
+  margin: 0 1px;
+  box-shadow: 0px 0px 0px black;
+  vertical-align: baseline;
+  background: none;
+}
+
+kbd kbd:hover {
+  box-shadow: 0px 0px 0px black;
+}
+
+kbd:active kbd {
+  box-shadow: 0px 0px 0px black;
+  background: none;
+}
+
+.grabber {
+  position: absolute;
+  box-sizing: border-box;
+}
+
+.grabber:hover {
+  border-color: var(--light-border-colour, #d3d3d3);
+  border-style: solid;
+  border-width: 5px;
+}
+
+.grabber.right {
+  width: 10px;
+  height: 100%;
+  right: -5px;
+  top: 0;
+  cursor: col-resize;
+}
+
+.grabber.left {
+  width: 10px;
+  height: 100%;
+  left: -5px;
+  top: 0;
+  cursor: col-resize;
+}
+
+.grabber.top {
+  height: 10px;
+  width: 100%;
+  top: -5px;
+  cursor: row-resize;
+}
+
+.grabber.bottom {
+  height: 10px;
+  width: 100%;
+  bottom: -5px;
+  cursor: row-resize;
+}
+
+.grabber.top-left {
+  height: 20px;
+  width: 20px;
+  top: -10px;
+  left: -10px;
+  cursor: nw-resize;
+  border-radius: 100%;
+}
+
+.grabber.top-right {
+  height: 20px;
+  width: 20px;
+  top: -10px;
+  right: -10px;
+  cursor: ne-resize;
+  border-radius: 100%;
+}
+
+.grabber.bottom-left {
+  height: 20px;
+  width: 20px;
+  bottom: -10px;
+  left: -10px;
+  cursor: sw-resize;
+  border-radius: 100%;
+}
+
+.grabber.bottom-right {
+  height: 20px;
+  width: 20px;
+  bottom: -10px;
+  right: -10px;
+  cursor: se-resize;
+  border-radius: 100%;
+}
