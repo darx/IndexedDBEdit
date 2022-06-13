@@ -224,7 +224,7 @@ export default class storageController {
             data.data.push({
               key: cursor.key,
               value: cursor.value,
-              source: copy(cursor)?.source || {},
+              source: copy(cursor.source),
             });
             cursor.continue();
           };
