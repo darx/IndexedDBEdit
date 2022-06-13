@@ -73,7 +73,7 @@ export default class storageController {
                 var content = [];
 
                 transaction.oncomplete = event => {
-                  resolve({ name: objectstore, data:content });
+                  resolve({ name: objectstore, data: content });
                 };
 
                 transaction.onerror = event => {
@@ -137,9 +137,7 @@ export default class storageController {
       };
     })();`;
 
-    chrome.devtools.inspectedWindow.eval(script, (o, r) => {
-
-    });
+    chrome.devtools.inspectedWindow.eval(script, (o, r) => {});
   }
 
   updateValue(opts, fn) {
@@ -223,7 +221,11 @@ export default class storageController {
     
             if (!cursor) return resolve(data);
     
-            data.data.push(copy(cursor));
+            data.data.push({
+              key: cursor.key,
+              value: cursor.value,
+              source: copy(cursor)?.source || {},
+            });
             cursor.continue();
           };
     
@@ -260,7 +262,7 @@ export default class storageController {
       let data = await promiseAll;
     
       return (window.__MODIFY_STORAGE__.data = data);
-    })();
+    })();    
 `;
     chrome.devtools.inspectedWindow.eval(script, (o, r) => {
       let data;
