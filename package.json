@@ -1,6 +1,6 @@
 {
   "name": "indexeddb-edit",
-  "version": "0.0.1",
+  "version": "0.0.4",
   "private": true,
   "scripts": {
     "build": "rollup -c",
