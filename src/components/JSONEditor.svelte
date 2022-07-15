@@ -12,11 +12,12 @@
 
   import { onDestroy, onMount, createEventDispatcher } from "svelte";
 
-  import debounce from "../utils/debounce";
-
   import diff from "deep-diff";
   import ace from "ace-builds";
 
+  import "brace";
+  import "brace/keybinding";
+  import "brace/ext/searchbox";
   import "brace/mode/json";
   import "brace/worker/json";
   import "brace/theme/twilight";
@@ -26,6 +27,16 @@
   let container;
 
   const dispatch = createEventDispatcher();
+
+  const debounce = (callback, wait) => {
+    let timeoutId = null;
+    return (...args) => {
+      window.clearTimeout(timeoutId);
+      timeoutId = window.setTimeout(() => {
+        callback.apply(null, args);
+      }, wait);
+    };
+  };
 
   export const save = () => {
     let content = editor.getValue();

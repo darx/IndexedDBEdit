@@ -1,6 +1,6 @@
-export default function clickOutside(node) {
-  const handleClick = (event) => {
-    if (!node.contains(event.target)) {
+export default function clickOutside(node: Element) {
+  const handleClick = (event: Event) => {
+    if (!node.contains(event.target as Element)) {
       setTimeout(() => {
         node.dispatchEvent(new CustomEvent("outclick"));
       }, 10);
