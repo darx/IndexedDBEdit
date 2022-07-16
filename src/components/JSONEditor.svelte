@@ -110,5 +110,18 @@
       background-color: var(--dark-primary-background-colour, #202124);
       border-bottom: 1px solid #494c50;
     }
+
+    .jsoneditor-svelte-container :global(.ace_button),
+    .jsoneditor-svelte-container :global(.ace_searchbtn),
+    .jsoneditor-svelte-container :global(.ace_search_field) {
+      color: white;
+    }
+
+    .jsoneditor-svelte-container :global(.ace_searchbtn),
+    .jsoneditor-svelte-container :global(.ace_search_field),
+    .jsoneditor-svelte-container :global(.ace_search) {
+      background-color: var(--dark-primary-background-colour, #202124);
+      border-color: #494c50;
+    }
   }
 </style>
