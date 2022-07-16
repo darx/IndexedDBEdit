@@ -12,11 +12,12 @@
 
   import { onDestroy, onMount, createEventDispatcher } from "svelte";
 
-  import debounce from "../utils/debounce";
-
   import diff from "deep-diff";
   import ace from "ace-builds";
 
+  import "brace";
+  import "brace/keybinding";
+  import "brace/ext/searchbox";
   import "brace/mode/json";
   import "brace/worker/json";
   import "brace/theme/twilight";
@@ -26,6 +27,16 @@
   let container;
 
   const dispatch = createEventDispatcher();
+
+  const debounce = (callback, wait) => {
+    let timeoutId = null;
+    return (...args) => {
+      window.clearTimeout(timeoutId);
+      timeoutId = window.setTimeout(() => {
+        callback.apply(null, args);
+      }, wait);
+    };
+  };
 
   export const save = () => {
     let content = editor.getValue();
@@ -98,6 +109,19 @@
     .jsoneditor-svelte-container :global(.jsoneditor-menu) {
       background-color: var(--dark-primary-background-colour, #202124);
       border-bottom: 1px solid #494c50;
+    }
+
+    .jsoneditor-svelte-container :global(.ace_button),
+    .jsoneditor-svelte-container :global(.ace_searchbtn),
+    .jsoneditor-svelte-container :global(.ace_search_field) {
+      color: white;
+    }
+
+    .jsoneditor-svelte-container :global(.ace_searchbtn),
+    .jsoneditor-svelte-container :global(.ace_search_field),
+    .jsoneditor-svelte-container :global(.ace_search) {
+      background-color: var(--dark-primary-background-colour, #202124);
+      border-color: #494c50;
     }
   }
 </style>

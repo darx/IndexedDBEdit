@@ -1,4 +1,4 @@
-<script>
+<script lang="js">
   import { fade, fly } from "svelte/transition";
   import differenceBy from "lodash/differenceBy";
 
@@ -8,7 +8,7 @@
   import settings from "./stubs/settings";
 
   import resizable from "./utils/resizable";
-  import storageController from "./utils/storageController";
+  import storageController from "./utils/storage/controller";
 
   import Notification from "./components/Notification.svelte";
   import Toolbar from "./components/Toolbar.svelte";
@@ -35,7 +35,7 @@
   const init = () => {
     databases.set([]);
 
-    StorageController.test((d) => {
+    StorageController.getDatabases((d) => {
       loading = 100;
 
       const structure = d.reduce((acc, x) => {
@@ -107,7 +107,7 @@
     let diff = differenceBy(updated, original, "value");
     diff.forEach((x) => {
       if (x && x.key) {
-        StorageController.updateValue({
+        StorageController.updateRecord({
           version: options.source.transaction.db.version,
           database: options.database,
           storeName: options.source.name,

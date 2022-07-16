@@ -9,11 +9,11 @@ export default function handleKeyBindings(node, keys, event = "click") {
           return x;
       }).length === keys.length;
 
-    if (isBind) {
-      setTimeout(() => {
-        node.dispatchEvent(new CustomEvent(event));
-      }, 10);
-    }
+    if (!isBind) return;
+    
+    setTimeout(() => {
+      node.dispatchEvent(new CustomEvent(event));
+    }, 10);
   };
 
   window.addEventListener("keyup", handleKeyBinding, true);

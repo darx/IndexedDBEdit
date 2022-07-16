@@ -1,4 +1,4 @@
-export default function calculateSize (bytes) {
+export default function calculateSize (bytes: number) {
   const kb = 1024;
 
   if (Math.abs(bytes) < kb) return bytes + " B";
