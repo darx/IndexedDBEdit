@@ -1,6 +1,6 @@
 {
   "name": "IndexedDBEdit",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "manifest_version": 3,
   "description": "Devtools panel for changing IndexedDB key values",
   "devtools_page": "devtools.html",

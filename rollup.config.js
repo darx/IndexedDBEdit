@@ -8,7 +8,6 @@ import sveltePreprocess from "svelte-preprocess";
 import typescript from "@rollup/plugin-typescript";
 import { string } from "rollup-plugin-string";
 
-
 const production = !process.env.ROLLUP_WATCH;
 
 function serve() {
