@@ -9,7 +9,13 @@
     request = objectStore.get(${storeNameKey});
 
     request.onsuccess = () => {
-      objectStore.put(${storeNameKeyValue}, ${storeNameKey})
+      try {
+        objectStore.put(${storeNameKeyValue}, ${storeNameKey});
+      } catch (e) {
+        if (e && e.message.indexOf("in-line keys") !== -1) {
+          objectStore.put(${storeNameKeyValue});
+        }
+      }
     };
   };
 })();
