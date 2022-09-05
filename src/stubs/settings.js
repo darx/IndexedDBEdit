@@ -52,4 +52,26 @@ settings.subscribe(value => {
   localStorage.setItem("__idxe_settings", JSON.stringify(value));
 });
 
+export const saving = writable(false);
+export const loading = (() => {
+  const loading = writable(0);
+  const { set } = loading;
+
+  let waiting;
+  let start = () => setInterval(() => {
+    set(loading + 10);
+
+    if (loading < 100) return;
+
+    set(100);
+    clearInterval(waiting);
+  }, 1000);
+
+  return {
+    ...loading,
+    start,
+    completed: () => set(100)
+  };
+})();
+
 export default settings;
