@@ -1,142 +1,51 @@
 <script lang="js">
-  import { fade, fly } from "svelte/transition";
-  import differenceBy from "lodash/differenceBy";
+  import { onMount } from "svelte";
 
-  import { databases, selected, tree } from "./store";
+  import { fade, fly } from "svelte/transition";
+
+  import { databases, selected, tree, modified } from "./store";
 
   import tips from "./stubs/tips";
-  import settings from "./stubs/settings";
+  import settings, { loading, saving } from "./stubs/settings";
 
   import resizable from "./utils/resizable";
+
+  import * as helpers from "./utils/storage/helpers";
   import storageController from "./utils/storage/controller";
 
-  import Notification from "./components/Notification.svelte";
   import Toolbar from "./components/Toolbar.svelte";
   import TreeView from "./components/TreeView.svelte";
   import Progress from "./components/Progress.svelte";
   import JSONEditor from "./components/JSONEditor.svelte";
+  import Notification from "./components/Notification.svelte";
   import BracketsIcon from "./components/icons/Brackets.svelte";
 
   let editor;
-  let options;
-  let loading = 0;
-  let saving = false;
 
-  let waiting = setInterval(() => {
-    loading = loading + 10;
-    if (loading >= 100) {
-      loading = 100;
-      clearInterval(waiting);
-    }
-  }, 1000);
+  const storage = new storageController();
 
-  const StorageController = new storageController();
+  helpers.storage.set(storage);
 
-  const init = () => {
+  onMount(async () => {
+    loading.start();
+
     databases.set([]);
 
-    StorageController.getDatabases((d) => {
-      loading = 100;
+    const data = await storage.getDatabases();
 
-      const structure = d.reduce((acc, x) => {
-        if (x.length) {
-          let { name, objectStoreNames, version } = x[0].database;
-          acc.push({
-            databaseName: name,
-            databaseVersion: version,
-            objectStoreNames,
-            stores: objectStoreNames.map((y, index) => {
-              return { name: y, data: x[index].data };
-            }),
-          });
-        }
-        return acc;
-      }, []);
+    const entries = helpers.structure.database(data);
+    const children = helpers.structure.tree(data);
 
-      const test = {
-        label: "IndexedDB",
-        children: d.reduce((acc, x) => {
-          if (x.length) {
-            let { name, objectStoreNames, version } = x[0].database;
-            acc.push({
-              label: name,
-              version: version,
-              children: objectStoreNames.map((y, index) => {
-                return { label: y };
-              }),
-              stores: objectStoreNames.map((y, index) => {
-                return { name: y, data: x[index].data };
-              }),
-            });
-          }
-          return acc;
-        }, []),
-      };
+    loading.completed();
 
-      tree.set(test);
-      databases.set(structure);
-    });
-  };
-
-  init();
-
-  const onSave = ({ detail }) => {
-    let { [0]: updated, [2]: original } = detail;
-
-    const isSameRecord = (x, y) => x.key == y.key && x.vaule == y.vaule;
-
-    const inLeft = (l, r, compare) =>
-      l.filter((lv) => !r.some((rv) => compare(lv, rv)));
-
-    const inX = inLeft(updated, original, isSameRecord);
-    const inY = inLeft(original, updated, isSameRecord);
-
-    const deleted = [...inX, ...inY].map((x) => x.key);
-
-    saving = true;
-
-    deleted.forEach((x) =>
-      StorageController.deleteRecord({
-        version: options.source.transaction.db.version,
-        database: options.database,
-        storeName: options.source.name,
-        storeNameKey: typeof x === "number" ? x : `"${x}"`,
-      })
-    );
-
-    let diff = differenceBy(updated, original, "value");
-    diff.forEach((x) => {
-      if (x && x.key) {
-        StorageController.updateRecord({
-          version: options.source.transaction.db.version,
-          database: options.database,
-          storeName: options.source.name,
-          storeNameKey: typeof x.key === "number" ? x.key : `"${x.key}"`,
-          storeNameKeyValue: JSON.stringify(x.value),
-        });
-      }
-    });
-  };
-
-  const storeLookup = (database, store) => {
-    const items = $databases
-      .find((x) => x.databaseName == database)
-      .stores.find((x) => x.name == store).data;
-
-    const selected = { database };
-
-    const values = items.map((x) => {
-      if (!selected.source) selected.source = x.source;
-      return { key: x.key, value: x.value };
-    });
-
-    return [values, selected];
-  };
+    tree.set({ label: "IndexedDB", children });
+    databases.set(entries);
+  });
 
   const onTreeClick = ({ detail }) => {
-    const items = storeLookup.apply(null, detail);
+    const items = helpers.lookup.apply(null, detail);
 
-    options = items[1];
+    modified.set(items[1]);
     selected.set(items[0]);
   };
 
@@ -146,7 +55,7 @@
   };
 
   $: placeholder = (() => {
-    if (loading < 100) {
+    if ($loading > 100) {
       return "Content not Loaded";
     } else if (content === false) {
       return "No content";
@@ -161,6 +70,7 @@
     (acc, curr) => ((acc[curr.name] = curr.value), acc),
     {}
   );
+
 </script>
 
 <main class:panel_right={preferences.side_position == "Right"}>
@@ -183,7 +93,7 @@
       position={preferences.message_position}
       bind:active={$tips.save_method.active}
     />
-    <Progress value={loading} hideOnComplete={true} />
+    <Progress value={$loading} hideOnComplete={true} />
 
     {#if !$selected}
       <div class="no_table">
@@ -198,11 +108,11 @@
       </div>
     {:else}
       <Notification
-        bind:active={saving}
+        bind:active={$saving}
         text="Saving changes ..."
         timeout={2000}
       />
-      <JSONEditor on:save={onSave} bind:editor bind:value={$selected} />
+      <JSONEditor on:save={helpers.onSave} bind:editor bind:value={$selected} />
     {/if}
   </div>
 </main>

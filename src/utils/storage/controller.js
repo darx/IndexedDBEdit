@@ -34,30 +34,36 @@ export default class storageController {
         if (!res) {
           return setTimeout(data, wait);
         }
-        if ("function" === typeof fn) {
-          fn(res);
-        }
+        fn(res);
       });
     })();
   }
 
-  fetchTableNames(fn) {
-    this.inject(getDatabasesNames, () => this.check(fn, "tables"));
+  fetchTableNames() {
+    return new Promise((resolve) => {
+      this.inject(getDatabasesNames, () => this.check(resolve, "tables"));
+    });
   }
 
   fetch(key, fn) {
     this.inject(interpolate(getFromCache, { key }), (o) => fn(o));
   }
 
-  deleteRecord(opts, fn) {
-    this.inject(interpolate(deleteRecord, opts), () => this.check(fn));
+  deleteRecord(opts) {
+    return new Promise((resolve) => {
+      this.inject(interpolate(deleteRecord, opts), () => this.check(resolve));
+    });
   }
 
-  updateRecord(opts, fn) {
-    this.inject(interpolate(updateRecord, opts), () => this.check(fn));
+  updateRecord(opts) {
+    return new Promise((resolve) => {
+      this.inject(interpolate(updateRecord, opts), () => this.check(resolve));
+    });
   }
 
-  getDatabases(fn) {
-    this.inject(getDatabases, this.check(fn, "data", 500));
+  getDatabases() {
+    return new Promise((resolve) => {
+      this.inject(getDatabases, this.check(resolve, "data", 500));
+    });
   }
 }
