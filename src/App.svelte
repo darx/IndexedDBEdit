@@ -178,12 +178,13 @@
     left: 0;
     width: 100%;
     height: 100%;
-    overflow: auto;
     position: absolute;
   }
 
   :global(.panel .wrapper > ul) {
     padding: 0;
+    height: 100%;
+    overflow: auto;
   }
 
   .no_table {
