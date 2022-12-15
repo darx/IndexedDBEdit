@@ -43,10 +43,6 @@
     }
 
     if ([37, 39].includes(keyCode)) {
-
-      console.log(parent);
-      console.log(e.keyCode)
-
       return toggleExpansion(keyCode === 39);
     }
 
